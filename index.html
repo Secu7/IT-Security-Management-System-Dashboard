@@ -1,83 +1,1474 @@
-# IT-Security-Management-System-Dashboard
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Security Operations Center (SOC) - Threat Intelligence Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-A browser-based cybersecurity dashboard that simulates the core functions of a modern Security Operations Center (SOC). This project was designed from the perspective of a security analyst with hands-on experience in threat detection, incident response, and compliance monitoring in enterprise environments.
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0f1c 0%, #0f172a 30%, #1e293b 70%, #334155 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
 
----
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+            animation: gridPulse 4s ease-in-out infinite;
+        }
 
-## Overview
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.1; }
+        }
 
-The dashboard provides a unified view of simulated threat intelligence, incident triage, vulnerability exposure, access control, and compliance status across segmented enterprise networks.
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
 
-Rather than focusing on visuals, this system models how analysts make decisions. It combines real-world frameworks like MITRE ATT&CK, NIST CSF, Zero Trust, and SOC 2 into an interface built to support simulated security operations.
+        .header {
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
 
----
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                #dc2626 0%, #ea580c 20%, #f59e0b 40%, 
+                #22c55e 60%, #3b82f6 80%, #8b5cf6 100%);
+            animation: threatLevel 3s ease-in-out infinite;
+        }
 
-## Key Features
+        @keyframes threatLevel {
+            0%, 100% { opacity: 1; transform: scaleX(1); }
+            50% { opacity: 0.6; transform: scaleX(0.95); }
+        }
 
-- Simulates detection of common threats: APTs, Kerberoasting, DNS tunneling, default credentials, CVE exploitation
-- Uses MITRE ATT&CK techniques to categorize incidents
-- Tracks SLA and response metrics (MTTD, MTTR)
-- Highlights Zero Trust segmentation, remote access posture, and user behavior
-- Visualizes CVSS-based vulnerabilities with patch coverage and exploit readiness
-- Displays compliance metrics across SOC 2, ISO 27001, and internal audit readiness
+        .header h1 {
+            color: #f1f5f9;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
 
----
+        .header .subtitle {
+            color: #94a3b8;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
 
-## Designed for Security Analysts
+        .threat-level-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            animation: pulse 2s infinite;
+        }
 
-Each component of the dashboard is based on operational workflows used by real analysts:
+        .threat-elevated {
+            background: rgba(234, 88, 12, 0.2);
+            color: #fed7aa;
+            border: 1px solid rgba(234, 88, 12, 0.3);
+        }
 
-- Incident response triage with mapped tactics and techniques
-- IAM views showing AD health, privilege levels, and MFA coverage
-- Network segmentation monitoring aligned to RFC 1918 design
-- Vulnerability scanning workflows (simulated Nmap, Nessus, ZAP, etc.)
-- Compliance tracking linked to training, control tests, and audit metrics
+        .header p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
 
-For threat scenarios and how each part of the UI maps to real workflows, see:
+        .network-topology {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
 
-- `/docs/use-cases.md`
-- `/docs/architecture.md`
+        .topology-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
 
----
+        .topology-title {
+            font-weight: 700;
+            color: #f1f5f9;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-## System Architecture
+        .scan-metadata {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-family: 'Courier New', monospace;
+        }
 
-- Static frontend built with HTML5, CSS3, JavaScript (ES6+), and Chart.js
-- Runs entirely in the browser, no backend or installation required
-- Responsive layout for 1920x1080 and tablets
-- Secure by design: no telemetry, no external calls, no persistent storage
+        .network-segments {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
 
----
+        .network-segment {
+            background: rgba(51, 65, 85, 0.7);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+            position: relative;
+        }
 
-## Network Scope Simulated
+        .network-segment:hover {
+            background: rgba(51, 65, 85, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
 
-| Segment           | Purpose                             | CIDR               |
-|-------------------|-------------------------------------|--------------------|
-| Internal LAN      | Finance and executive workstations  | 192.168.1.0/24     |
-| DMZ               | Web, mail, and public servers       | 10.0.1.0/24        |
-| Server Farm       | Application and database servers    | 172.16.0.0/16      |
-| VPN Pool          | Remote access endpoint range        | 10.8.0.0/24        |
-| IoT/OT            | Smart building and ICS              | 192.168.100.0/24   |
-| Guest WiFi        | Visitor and unmanaged devices       | 192.168.200.0/24   |
+        .segment-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
 
-Each segment is associated with simulated data to represent different risk levels and exposure points.
+        .segment-name {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+        }
 
----
+        .segment-status {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
 
-## Running the Dashboard
+        .status-secure { background: rgba(34, 197, 94, 0.2); color: #bbf7d0; }
+        .status-warning { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
+        .status-critical { background: rgba(220, 38, 38, 0.2); color: #fca5a5; }
 
-No installation required. Just clone and open the HTML file:
+        .segment-details {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
 
-```bash
-git clone https://github.com/Secu7/IT-Security-Management-System-Dashboard.git
-cd IT-Security-Management-System-Dashboard
-open index.html   
+        .main-button {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%);
+            color: white;
+            border: none;
+            padding: 18px 48px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 4px 20px rgba(220, 38, 38, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            overflow: hidden;
+        }
 
-Technical Details
-Built with Chart.js for dynamic visualization
+        .main-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
 
-Custom scan logic simulates Nmap, Nessus, ZAP, SQLMap, AD tools, and threat correlation rules
+        .main-button:hover::before {
+            left: 100%;
+        }
 
-Each security card and chart is tied to a use case based on real threat types
+        .main-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 30px rgba(220, 38, 38, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 50%, #450a0a 100%);
+        }
 
-Clean modular structure for easy extension and theming
+        .main-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 16px 48px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-color: #475569;
+        }
+
+        .card h3 {
+            color: #f1f5f9;
+            margin-bottom: 24px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.025em;
+        }
+
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(30, 41, 59, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .metric:hover {
+            background: rgba(30, 41, 59, 0.3);
+            margin: 0 -14px 16px;
+            padding: 12px 14px;
+            border-radius: 8px;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .status-secure { color: #22c55e; text-shadow: 0 0 8px rgba(34, 197, 94, 0.3); }
+        .status-warning { color: #f59e0b; text-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+        .status-critical { color: #ef4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.3); }
+        .status-info { color: #3b82f6; text-shadow: 0 0 8px rgba(59, 130, 246, 0.3); }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            margin-top: 20px;
+        }
+
+        .incident-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #1e293b;
+        }
+
+        .incident-item {
+            background: rgba(30, 41, 59, 0.7);
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .incident-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.02) 100%);
+            pointer-events: none;
+        }
+
+        .incident-item:hover {
+            background: rgba(30, 41, 59, 0.9);
+            transform: translateX(6px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .incident-critical { 
+            border-left-color: #dc2626; 
+            background: rgba(220, 38, 38, 0.08);
+        }
+        .incident-high { 
+            border-left-color: #ea580c; 
+            background: rgba(234, 88, 12, 0.08);
+        }
+        .incident-medium { 
+            border-left-color: #d97706; 
+            background: rgba(217, 119, 6, 0.08);
+        }
+        .incident-low { 
+            border-left-color: #16a34a; 
+            background: rgba(22, 163, 74, 0.08);
+        }
+
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .incident-title {
+            font-weight: 700;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            flex: 1;
+            margin-right: 12px;
+        }
+
+        .incident-priority {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .priority-critical {
+            background: rgba(220, 38, 38, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .priority-high {
+            background: rgba(234, 88, 12, 0.2);
+            color: #fed7aa;
+            border: 1px solid rgba(234, 88, 12, 0.3);
+        }
+
+        .priority-medium {
+            background: rgba(217, 119, 6, 0.2);
+            color: #fde68a;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .priority-low {
+            background: rgba(22, 163, 74, 0.2);
+            color: #bbf7d0;
+            border: 1px solid rgba(22, 163, 74, 0.3);
+        }
+
+        .incident-details {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+        }
+
+        .incident-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .incident-mitre {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-family: 'Courier New', monospace;
+            background: rgba(51, 65, 85, 0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .incident-killchain {
+            font-size: 0.7rem;
+            color: #8b5cf6;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 80px 20px;
+            color: #94a3b8;
+        }
+
+        .spinner {
+            border: 4px solid rgba(148, 163, 184, 0.2);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 32px;
+        }
+
+        .scan-progress {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            border: 1px solid #475569;
+        }
+
+        .progress-bar {
+            background: #1e293b;
+            border-radius: 6px;
+            height: 12px;
+            margin: 16px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8, #1e40af);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .system-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .info-item:hover {
+            background: rgba(30, 41, 59, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #f1f5f9;
+            margin-bottom: 6px;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .info-label {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .vulnerability-item {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid #f59e0b;
+            transition: all 0.3s ease;
+        }
+
+        .vulnerability-item:hover {
+            background: rgba(30, 41, 59, 0.9);
+            transform: translateX(4px);
+        }
+
+        .cve-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cve-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #f59e0b;
+            font-weight: 700;
+        }
+
+        .cvss-score {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .cvss-critical { background: #dc2626; color: white; }
+        .cvss-high { background: #ea580c; color: white; }
+        .cvss-medium { background: #d97706; color: white; }
+        .cvss-low { background: #16a34a; color: white; }
+
+        .cve-description {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .threat-feed-item {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #8b5cf6;
+            font-size: 0.8rem;
+        }
+
+        .feed-source {
+            color: #8b5cf6;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .feed-content {
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .compliance-item {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border-top: 2px solid #22c55e;
+        }
+
+        .compliance-score {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #22c55e;
+            margin-bottom: 4px;
+        }
+
+        .compliance-label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .network-segments {
+                grid-template-columns: 1fr;
+            }
+            
+            .system-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Enterprise SOC Platform</h1>
+            <div class="subtitle">
+                Security Operations Center - Threat Intelligence & Incident Response
+                <div class="threat-level-indicator threat-elevated">
+                    ⚠️ THREAT LEVEL: ELEVATED
+                </div>
+            </div>
+            <p>
+                Advanced cybersecurity monitoring platform implementing NIST Cybersecurity Framework, MITRE ATT&CK tactics, 
+                and Zero Trust Architecture. Real-time threat detection, automated incident response, and comprehensive 
+                compliance monitoring across hybrid cloud infrastructure. SOC 2 Type II certified with 24/7 threat hunting capabilities.
+            </p>
+            
+            <div class="network-topology">
+                <div class="topology-header">
+                    <div class="topology-title">
+                        🌐 Network Security Assessment Scope
+                    </div>
+                    <div class="scan-metadata">
+                        Last Scan: 2024-06-08 14:32:45 UTC | Coverage: 99.7% | Assets: 3,247
+                    </div>
+                </div>
+                <div class="network-segments">
+                    <div class="network-segment">
+                        <div class="segment-header">
+                            <div class="segment-name">192.168.1.0/24 - Internal LAN</div>
+                            <div class="segment-status status-secure">SECURE</div>
+                        </div>
+                        <div class="segment-details">
+                            Executive workstations, finance systems<br>
+                            847 hosts | VLAN 10 | Next-Gen Firewall protected
+                        </div>
+                    </div>
+                    <div class="network-segment">
+                        <div class="segment-header">
+                            <div class="segment-name">10.0.1.0/24 - DMZ Segment</div>
+                            <div class="segment-status status-warning">MONITORED</div>
+                        </div>
+                        <div class="segment-details">
+                            Web servers, mail gateway, public services<br>
+                            23 hosts | VLAN 100 | WAF + IDS/IPS active
+                        </div>
+                    </div>
+                    <div class="network-segment">
+                        <div class="segment-header">
+                            <div class="segment-name">172.16.0.0/16 - Server Farm</div>
+                            <div class="segment-status status-secure">HARDENED</div>
+                        </div>
+                        <div class="segment-details">
+                            Database clusters, application servers<br>
+                            156 hosts | VLAN 20-25 | Micro-segmented
+                        </div>
+                    </div>
+                    <div class="network-segment">
+                        <div class="segment-header">
+                            <div class="segment-name">10.8.0.0/24 - VPN Pool</div>
+                            <div class="segment-status status-secure">ENCRYPTED</div>
+                        </div>
+                        <div class="segment-details">
+                            Remote workforce access<br>
+                            342 active sessions | OpenVPN + MFA
+                        </div>
+                    </div>
+                    <div class="network-segment">
+                        <div class="segment-header">
+                            <div class="segment-name">192.168.100.0/24 - IoT/OT</div>
+                            <div class="segment-status status-warning">ISOLATED</div>
+                        </div>
+                        <div class="segment-details">
+                            Industrial controls, smart building systems<br>
+                            89 devices | Air-gapped network
+                        </div>
+                    </div>
+                    <div class="network-segment">
+                        <div class="segment-header">
+                            <div class="segment-name">192.168.200.0/24 - Guest WiFi</div>
+                            <div class="segment-status status-critical">QUARANTINED</div>
+                        </div>
+                        <div class="segment-details">
+                            Visitor network access<br>
+                            127 sessions | DPI + Content filtering
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="main-button" onclick="runComprehensiveSecurityScan()" id="scanButton">
+                🔍 Execute Full-Spectrum Security Scan
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <h3>Advanced Persistent Threat (APT) Analysis in Progress</h3>
+            <p>Executing multi-vector security assessment across enterprise infrastructure...</p>
+            <div class="scan-progress">
+                <div>Network Penetration Testing: <span id="scanStatus">Initializing Nmap NSE scripts...</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="scanDetails" style="margin-top: 12px; color: #64748b; font-size: 0.8rem;">
+                    Preparing OWASP ZAP, Nessus, and custom exploit frameworks...
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="card">
+                <h3><div class="card-icon">🛡️</div>NIST CSF - Cybersecurity Posture</h3>
+                <div class="metric">
+                    <span class="metric-label">Cybersecurity Maturity Level</span>
+                    <span class="metric-value status-secure" id="security-status">TIER 3 - REPEATABLE</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Active IOCs (Threat Intelligence)</span>
+                    <span class="metric-value status-warning" id="active-threats">47 Indicators</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Asset Inventory (CMDB)</span>
+                    <span class="metric-value status-info" id="systems-monitored">3,247 Assets</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Last VAPT Assessment</span>
+                    <span class="metric-value" id="last-scan">2 hours 17 min ago</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">SOC 2 Type II Compliance</span>
+                    <span class="metric-value status-secure" id="compliance-score">98.4% Compliant</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">MTTD/MTTR (Mean Time)</span>
+                    <span class="metric-value status-info" id="response-time">3.2min / 18.7min</span>
+                </div>
+                <div class="compliance-grid">
+                    <div class="compliance-item">
+                        <div class="compliance-score">99.1%</div>
+                        <div class="compliance-label">ISO 27001</div>
+                    </div>
+                    <div class="compliance-item">
+                        <div class="compliance-score">97.8%</div>
+                        <div class="compliance-label">NIST 800-53</div>
+                    </div>
+                    <div class="compliance-item">
+                        <div class="compliance-score">98.4%</div>
+                        <div class="compliance-label">SOC 2</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🚨</div>Incident Response & SIEM Alerts</h3>
+                <div class="incident-list" id="incident-list">
+                    <div class="incident-item incident-critical">
+                        <div class="incident-header">
+                            <div class="incident-title">APT29 (Cozy Bear) C2 Beacon Detected</div>
+                            <div class="incident-priority priority-critical">P1-CRITICAL</div>
+                        </div>
+                        <div class="incident-details">
+                            <div>Analyst: Sarah Chen (L3)</div>
+                            <div>SLA: 15 min remaining</div>
+                            <div>Affected: 3 endpoints</div>
+                            <div>First Seen: 14:32 UTC</div>
+                        </div>
+                        <div class="incident-meta">
+                            <div class="incident-mitre">MITRE ATT&CK: T1071.001 - Web Protocols</div>
+                            <div class="incident-killchain">KILL CHAIN: C2</div>
+                        </div>
+                    </div>
+                    <div class="incident-item incident-high">
+                        <div class="incident-header">
+                            <div class="incident-title">Kerberoasting Attack - Golden Ticket Attempt</div>
+                            <div class="incident-priority priority-high">P2-HIGH</div>
+                        </div>
+                        <div class="incident-details">
+                            <div>Analyst: Marcus Rodriguez (L2)</div>
+                            <div>SLA: 45 min remaining</div>
+                            <div>Domain: CORP.LOCAL</div>
+                            <div>Source: 192.168.1.47</div>
+                        </div>
+                        <div class="incident-meta">
+                            <div class="incident-mitre">MITRE ATT&CK: T1558.001 - Golden Ticket</div>
+                            <div class="incident-killchain">KILL CHAIN: LATERAL MOVEMENT</div>
+                        </div>
+                    </div>
+                    <div class="incident-item incident-medium">
+                        <div class="incident-header">
+                            <div class="incident-title">Suspicious PowerShell Empire Activity</div>
+                            <div class="incident-priority priority-medium">P3-MEDIUM</div>
+                        </div>
+                        <div class="incident-details">
+                            <div>Analyst: Jennifer Park (L1)</div>
+                            <div>SLA: 3 hours 20 min</div>
+                            <div>Process: powershell.exe</div>
+                            <div>Host: WS-FINANCE-08</div>
+                        </div>
+                        <div class="incident-meta">
+                            <div class="incident-mitre">MITRE ATT&CK: T1059.001 - PowerShell</div>
+                            <div class="incident-killchain">KILL CHAIN: EXECUTION</div>
+                        </div>
+                    </div>
+                    <div class="incident-item incident-high">
+                        <div class="incident-header">
+                            <div class="incident-title">Data Exfiltration via DNS Tunneling</div>
+                            <div class="incident-priority priority-high">P2-HIGH</div>
+                        </div>
+                        <div class="incident-details">
+                            <div>Analyst: David Kim (L3)</div>
+                            <div>SLA: 25 min remaining</div>
+                            <div>Volume: 45.7 MB</div>
+                            <div>Destination: suspicious-domain.tk</div>
+                        </div>
+                        <div class="incident-meta">
+                            <div class="incident-mitre">MITRE ATT&CK: T1048.003 - Exfiltration Over Alternative Protocol</div>
+                            <div class="incident-killchain">KILL CHAIN: EXFILTRATION</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🌐</div>Zero Trust Network Architecture</h3>
+                <div class="system-info">
+                    <div class="info-item">
+                        <div class="info-value status-secure">99.8%</div>
+                        <div class="info-label">Network Uptime</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value">3,247</div>
+                        <div class="info-label">EDR Agents</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value status-warning">156</div>
+                        <div class="info-label">IDS/IPS Alerts</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value status-secure">99.2%</div>
+                        <div class="info-label">WAF Block Rate</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Next-Gen Firewall (Palo Alto)</span>
+                    <span class="metric-value status-secure">ACTIVE - Threat Prevention</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">ZTNA Sessions (Zscaler)</span>
+                    <span class="metric-value status-info">1,247 Active Tunnels</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Micro-Segmentation</span>
+                    <span class="metric-value status-secure">23 Security Zones</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">DDoS Protection (Cloudflare)</span>
+                    <span class="metric-value status-secure">Magic Transit Active</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">DNS Security (Umbrella)</span>
+                    <span class="metric-value status-info">2.3M Queries/day</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">📊</div>Threat Intelligence Dashboard</h3>
+                <div class="chart-container">
+                    <canvas id="threatChart"></canvas>
+                </div>
+                <div style="margin-top: 16px; padding: 12px; background: rgba(30, 41, 59, 0.6); border-radius: 8px;">
+                    <div style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px;">
+                        <strong>Current Threat Landscape:</strong>
+                    </div>
+                    <div class="threat-feed-item">
+                        <div class="feed-source">AlienVault OTX Feed</div>
+                        <div class="feed-content">New Emotet variant targeting financial institutions detected</div>
+                    </div>
+                    <div class="threat-feed-item">
+                        <div class="feed-source">FireEye Threat Intel</div>
+                        <div class="feed-content">APT40 infrastructure expansion observed in APAC region</div>
+                    </div>
+                    <div class="threat-feed-item">
+                        <div class="feed-source">MISP Platform</div>
+                        <div class="feed-content">47 new IOCs added from industry threat sharing community</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">👤</div>Identity & Access Management (IAM)</h3>
+                <div class="metric">
+                    <span class="metric-label">Active Directory Accounts</span>
+                    <span class="metric-value">4,892 Users</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Privileged Access (CyberArk)</span>
+                    <span class="metric-value status-warning">234 Admin Accounts</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Failed Authentications (24h)</span>
+                    <span class="metric-value status-critical">347 Failed Logins</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">MFA Enrollment (Okta)</span>
+                    <span class="metric-value status-secure">98.7% Coverage</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Conditional Access Policies</span>
+                    <span class="metric-value status-info">67 Active Rules</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Identity Governance (SailPoint)</span>
+                    <span class="metric-value status-secure">99.1% Compliant</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Anomalous Behavior (UBA)</span>
+                    <span class="metric-value status-warning">23 Risk Scores >80</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🔍</div>Vulnerability Management (VAPT)</h3>
+                <div class="vulnerability-item">
+                    <div class="cve-header">
+                        <div class="cve-id">CVE-2024-3094</div>
+                        <div class="cvss-score cvss-critical">CVSS: 10.0</div>
+                    </div>
+                    <div class="cve-description">
+                        XZ Utils Backdoor - Supply Chain Compromise (liblzma)
+                    </div>
+                </div>
+                <div class="vulnerability-item">
+                    <div class="cve-header">
+                        <div class="cve-id">CVE-2024-1086</div>
+                        <div class="cvss-score cvss-high">CVSS: 8.8</div>
+                    </div>
+                    <div class="cve-description">
+                        Linux Kernel - Use-After-Free Privilege Escalation
+                    </div>
+                </div>
+                <div class="vulnerability-item">
+                    <div class="cve-header">
+                        <div class="cve-id">CVE-2024-0012</div>
+                        <div class="cvss-score cvss-critical">CVSS: 9.3</div>
+                    </div>
+                    <div class="cve-description">
+                        Palo Alto Networks PAN-OS - Authentication Bypass
+                    </div>
+                </div>
+                <div class="vulnerability-item">
+                    <div class="cve-header">
+                        <div class="cve-id">CVE-2023-4863</div>
+                        <div class="cvss-score cvss-high">CVSS: 8.8</div>
+                    </div>
+                    <div class="cve-description">
+                        Chrome WebP Processing - Heap Buffer Overflow (0-day)
+                    </div>
+                </div>
+                <div class="metric" style="margin-top: 20px;">
+                    <span class="metric-label">Patch Management (WSUS)</span>
+                    <span class="metric-value status-secure">96.4% Coverage</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Critical Vulnerabilities</span>
+                    <span class="metric-value status-critical">7 Unpatched</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Exploit Availability</span>
+                    <span class="metric-value status-warning">3 PoC Published</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Attack Surface Score</span>
+                    <span class="metric-value status-info">Medium Risk</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🔐</div>Data Loss Prevention (DLP)</h3>
+                <div class="metric">
+                    <span class="metric-label">Data Classification (Forcepoint)</span>
+                    <span class="metric-value">847 TB Classified</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">DLP Policy Violations (24h)</span>
+                    <span class="metric-value status-warning">23 Incidents</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Email Security (Proofpoint)</span>
+                    <span class="metric-value status-secure">99.8% Spam Blocked</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Cloud Security (CASB)</span>
+                    <span class="metric-value status-info">156 SaaS Apps</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Endpoint DLP Agents</span>
+                    <span class="metric-value">2,847 Active</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Data Encryption</span>
+                    <span class="metric-value status-secure">AES-256 Standard</span>
+                </div>
+                <div class="system-info" style="margin-top: 16px;">
+                    <div class="info-item">
+                        <div class="info-value status-warning">23</div>
+                        <div class="info-label">DLP Alerts</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value status-critical">3</div>
+                        <div class="info-label">Data Breaches</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value">847</div>
+                        <div class="info-label">TB Protected</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🏛️</div>Governance, Risk & Compliance</h3>
+                <div class="metric">
+                    <span class="metric-label">Risk Assessment Score</span>
+                    <span class="metric-value status-warning">Medium Risk (6.2/10)</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Audit Findings (Internal)</span>
+                    <span class="metric-value status-info">12 Open Items</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Policy Management</span>
+                    <span class="metric-value status-secure">89 Policies Active</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Training Completion</span>
+                    <span class="metric-value status-secure">97.3% Staff Trained</span>
+                </div>
+                <div class="compliance-grid">
+                    <div class="compliance-item">
+                        <div class="compliance-score">98.9%</div>
+                        <div class="compliance-label">GDPR</div>
+                    </div>
+                    <div class="compliance-item">
+                        <div class="compliance-score">96.7%</div>
+                        <div class="compliance-label">HIPAA</div>
+                    </div>
+                    <div class="compliance-item">
+                        <div class="compliance-score">99.2%</div>
+                        <div class="compliance-label">PCI DSS</div>
+                    </div>
+                    <div class="compliance-item">
+                        <div class="compliance-score">97.1%</div>
+                        <div class="compliance-label">FISMA</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let threatChart;
+        let scanProgress = 0;
+        let scanInterval;
+
+        const professionalScanSteps = [
+            "Initializing Nmap NSE (Network Service Enumeration) scripts...",
+            "Executing TCP SYN scan on 192.168.1.0/24 (Internal LAN)...",
+            "Performing service version detection (-sV) on discovered ports...",
+            "Scanning DMZ segment 10.0.1.0/24 with OS fingerprinting (-O)...",
+            "Analyzing server farm 172.16.0.0/16 for SQL injection vectors...",
+            "Testing VPN pool 10.8.0.0/24 for weak encryption protocols...",
+            "Scanning IoT devices 192.168.100.0/24 for default credentials...",
+            "Checking guest network 192.168.200.0/24 for lateral movement paths...",
+            "Launching Nessus Professional vulnerability assessment...",
+            "Running OWASP ZAP against web applications in DMZ...",
+            "Executing Metasploit auxiliary modules for service exploitation...",
+            "Performing Kerberoasting attacks against Active Directory...",
+            "Testing for SMB relay attacks and NTLM hash cracking...",
+            "Analyzing network traffic with Wireshark for anomalies...",
+            "Correlating findings with MITRE ATT&CK framework...",
+            "Cross-referencing vulnerabilities with NIST NVD database...",
+            "Generating risk-based vulnerability prioritization report...",
+            "Updating threat intelligence feeds and IOC databases...",
+            "Finalizing executive summary with business impact analysis..."
+        ];
+
+        function initializeThreatChart() {
+            const threatCtx = document.getElementById('threatChart').getContext('2d');
+            
+            const gradient1 = threatCtx.createLinearGradient(0, 0, 0, 300);
+            gradient1.addColorStop(0, 'rgba(239, 68, 68, 0.3)');
+            gradient1.addColorStop(1, 'rgba(239, 68, 68, 0.05)');
+            
+            const gradient2 = threatCtx.createLinearGradient(0, 0, 0, 300);
+            gradient2.addColorStop(0, 'rgba(34, 197, 94, 0.3)');
+            gradient2.addColorStop(1, 'rgba(34, 197, 94, 0.05)');
+            
+            const gradient3 = threatCtx.createLinearGradient(0, 0, 0, 300);
+            gradient3.addColorStop(0, 'rgba(245, 158, 11, 0.3)');
+            gradient3.addColorStop(1, 'rgba(245, 158, 11, 0.05)');
+
+            threatChart = new Chart(threatCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [{
+                        label: 'Threats Detected',
+                        data: [67, 45, 89, 123, 98, 156, 87],
+                        borderColor: '#ef4444',
+                        backgroundColor: gradient1,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#dc2626',
+                        pointHoverRadius: 8,
+                        pointRadius: 4,
+                        borderWidth: 3
+                    }, {
+                        label: 'Threats Mitigated',
+                        data: [62, 41, 84, 117, 91, 149, 81],
+                        borderColor: '#22c55e',
+                        backgroundColor: gradient2,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#22c55e',
+                        pointBorderColor: '#16a34a',
+                        pointHoverRadius: 8,
+                        pointRadius: 4,
+                        borderWidth: 3
+                    }, {
+                        label: 'IOCs Identified',
+                        data: [23, 18, 34, 47, 39, 58, 31],
+                        borderColor: '#f59e0b',
+                        backgroundColor: gradient3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#f59e0b',
+                        pointBorderColor: '#d97706',
+                        pointHoverRadius: 8,
+                        pointRadius: 4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#f1f5f9',
+                                font: {
+                                    size: 13,
+                                    weight: 600
+                                },
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(51, 65, 85, 0.3)',
+                                lineWidth: 1
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(51, 65, 85, 0.3)',
+                                lineWidth: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function runComprehensiveSecurityScan() {
+            const loading = document.getElementById('loading');
+            const dashboard = document.getElementById('dashboard');
+            const scanButton = document.getElementById('scanButton');
+            const progressFill = document.getElementById('progressFill');
+            const scanStatus = document.getElementById('scanStatus');
+            const scanDetails = document.getElementById('scanDetails');
+            
+            // Disable button and show loading
+            scanButton.disabled = true;
+            scanButton.textContent = '🔄 Advanced Threat Hunting in Progress...';
+            loading.style.display = 'block';
+            dashboard.style.display = 'none';
+            
+            scanProgress = 0;
+            let stepIndex = 0;
+            
+            scanInterval = setInterval(() => {
+                scanProgress += Math.random() * 8 + 3; // Slower, more realistic progress
+                
+                if (scanProgress > 100) {
+                    scanProgress = 100;
+                    clearInterval(scanInterval);
+                    
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                        dashboard.style.display = 'grid';
+                        scanButton.disabled = false;
+                        scanButton.textContent = '🔍 Execute Full-Spectrum Security Scan';
+                        
+                        // Update some metrics to show scan results
+                        updateScanResults();
+                    }, 2000);
+                }
+                
+                progressFill.style.width = scanProgress + '%';
+                
+                if (stepIndex < professionalScanSteps.length && scanProgress > (stepIndex + 1) * (100 / professionalScanSteps.length)) {
+                    scanStatus.textContent = professionalScanSteps[stepIndex];
+                    stepIndex++;
+                    
+                    // Add technical details based on scan step
+                    const technicalDetails = [
+                        "Mapping network topology with traceroute and ping sweeps...",
+                        "Discovering 847 live hosts, 23,456 open ports identified...",
+                        "Service enumeration complete: HTTP/HTTPS, SSH, RDP, SMB detected...",
+                        "OS detection: Windows Server 2019/2022, Ubuntu 20.04 LTS, CentOS 8...",
+                        "SQL injection testing on 15 web applications, 3 vulnerabilities found...",
+                        "VPN encryption analysis: OpenVPN AES-256, IPSec confirmed secure...",
+                        "IoT device audit: 23 devices with default credentials detected...",
+                        "Guest network isolation verified, no lateral movement paths found...",
+                        "Nessus scan initiated: 15,000+ vulnerability checks running...",
+                        "Web app security testing: XSS, CSRF, directory traversal checks...",
+                        "Exploit framework testing: 5 critical vulnerabilities confirmed...",
+                        "AD security assessment: 12 privileged accounts flagged for review...",
+                        "SMB relay attack simulation: 3 successful privilege escalations...",
+                        "Network traffic analysis: 47 suspicious patterns identified...",
+                        "Attack pattern correlation: APT29 TTPs detected in environment...",
+                        "Vulnerability prioritization: 7 critical, 23 high, 89 medium risk...",
+                        "Risk scoring complete: Business impact assessment generated...",
+                        "Threat intelligence update: 156 new IOCs integrated...",
+                        "Executive dashboard updated with actionable intelligence..."
+                    ];
+                    
+                    if (stepIndex - 1 < technicalDetails.length) {
+                        scanDetails.textContent = technicalDetails[stepIndex - 1];
+                    }
+                }
+            }, 400); // Slower interval for more realistic feel
+        }
+
+        function updateScanResults() {
+            // Simulate updated metrics after scan
+            document.getElementById('active-threats').textContent = '52 Indicators';
+            document.getElementById('systems-monitored').textContent = '3,247 Assets';
+            document.getElementById('last-scan').textContent = 'Just completed';
+            
+            // Add some visual feedback
+            const metrics = document.querySelectorAll('.metric-value');
+            metrics.forEach(metric => {
+                metric.style.animation = 'pulse 0.5s ease-in-out';
+            });
+            
+            setTimeout(() => {
+                metrics.forEach(metric => {
+                    metric.style.animation = '';
+                });
+            }, 500);
+        }
+
+        // Initialize the chart when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeThreatChart();
+            
+            // Add some dynamic updates to make it feel more alive
+            setInterval(() => {
+                if (threatChart && document.getElementById('dashboard').style.display !== 'none') {
+                    // Randomly update some chart data points
+                    const datasets = threatChart.data.datasets;
+                    datasets.forEach(dataset => {
+                        dataset.data = dataset.data.map(value => 
+                            Math.max(0, value + Math.floor(Math.random() * 10 - 5))
+                        );
+                    });
+                    threatChart.update('none');
+                }
+            }, 30000); // Update every 30 seconds
+        });
+
+        // Add some keyboard shortcuts for power users
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+                e.preventDefault();
+                runComprehensiveSecurityScan();
+            }
+        });
+    </script>
+</body>
+</html>

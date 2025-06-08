@@ -1,118 +1,85 @@
-# Enterprise SOC Threat Intelligence Dashboard
+# IT-Security-Management-System-Dashboard
 
-An interactive, analyst-designed cybersecurity dashboard simulating the core functions of a modern Security Operations Center (SOC). It integrates incident response, vulnerability management, and compliance tracking into a unified interface, grounded in real-world operational needs and industry-standard security frameworks.
+A browser-based cybersecurity dashboard that simulates the core functions of a modern Security Operations Center (SOC). This project was designed from the perspective of a security analyst with hands-on experience in threat detection, incident response, and compliance monitoring in enterprise environments.
 
 ---
 
 ## Overview
 
-This project is built from the perspective of a cybersecurity analyst with experience in enterprise SOC operations, combining visual clarity with the structure required to reflect actual threat environments.
+The dashboard provides a unified view of simulated threat intelligence, incident triage, vulnerability exposure, access control, and compliance status across segmented enterprise networks.
 
-Rather than just showcasing UI elements, this dashboard was designed to reflect:
-
-- How security analysts prioritize threats across networks
-- The way incidents are triaged and mapped to MITRE ATT&CK
-- What KPIs matter in a mature cybersecurity program
-- How Zero Trust and segmentation work in practice
+Rather than focusing on visuals, this system models how analysts make decisions. It combines real-world frameworks like MITRE ATT&CK, NIST CSF, Zero Trust, and SOC 2 into an interface built to support simulated security operations.
 
 ---
 
-## Key Capabilities
+## Key Features
 
-- **Real-Time Incident Simulation**  
-  Simulates APT campaigns (e.g., APT29), lateral movement, data exfiltration, and privilege escalation attempts using structured threat scenarios.
-  
-- **Security Framework Mapping**  
-  Every card reflects industry best practices:  
-  - MITRE ATT&CK TTP mapping  
-  - NIST Cybersecurity Framework (Identify → Recover)  
-  - SOC 2 Type II & ISO 27001 metrics  
-  - Zero Trust segmentation & access control
-
-- **Threat Intelligence Visualization**  
-  Dynamic threat charts display IOC detection, mitigation rates, and evolving attack trends using mock feeds (OTX, FireEye, MISP).
-
-- **Simulated Scanning Engine**  
-  Clicking **"Execute Full-Spectrum Security Scan"** triggers a multi-phase scan process (Nmap, Nessus, ZAP, Metasploit, etc.) with progress tracking and dynamic output.
-
-- **Modular Security Cards**  
-  The dashboard is organized into:
-  - Incident Response & SIEM Alerts
-  - Identity & Access Management
-  - Vulnerability Management (CVEs, patch status, exploitability)
-  - Data Loss Prevention
-  - Threat Intel Dashboard
-  - Governance, Risk, and Compliance
+- Simulates detection of common threats: APTs, Kerberoasting, DNS tunneling, default credentials, CVE exploitation
+- Uses MITRE ATT&CK techniques to categorize incidents
+- Tracks SLA and response metrics (MTTD, MTTR)
+- Highlights Zero Trust segmentation, remote access posture, and user behavior
+- Visualizes CVSS-based vulnerabilities with patch coverage and exploit readiness
+- Displays compliance metrics across SOC 2, ISO 27001, and internal audit readiness
 
 ---
 
-## Analyst Design Intent
+## Designed for Security Analysts
 
-This dashboard is informed by real-world SOC experience:
+Each component of the dashboard is based on operational workflows used by real analysts:
 
-- Designed to reflect workflows of Level 1–3 analysts
-- Emphasizes SLA-based triage, TTP attribution, and response metrics
-- Incorporates metrics like MTTD, MTTR, patch coverage, and compliance scoring
-- Simulates environments commonly found in financial, healthcare, and critical infrastructure sectors
+- Incident response triage with mapped tactics and techniques
+- IAM views showing AD health, privilege levels, and MFA coverage
+- Network segmentation monitoring aligned to RFC 1918 design
+- Vulnerability scanning workflows (simulated Nmap, Nessus, ZAP, etc.)
+- Compliance tracking linked to training, control tests, and audit metrics
 
----
+For threat scenarios and how each part of the UI maps to real workflows, see:
 
-## Architecture & Technologies
-
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Visualization**: Chart.js 3.9.1
-- **Design Principles**:
-  - No external data calls or server-side logic
-  - Fully static, runs in-browser for demonstration
-  - Responsive layout for desktop and tablet
-- **Security Concepts Modeled**:
-  - Network micro-segmentation (RFC 1918-compliant)
-  - Privileged access monitoring (CyberArk-style logic)
-  - Threat scoring and behavior analytics (UBA-style)
-  - DLP and CASB policy simulation
+- `/docs/use-cases.md`
+- `/docs/architecture.md`
 
 ---
 
-## Sample Threat Scenarios Included
+## System Architecture
 
-- **APT29 C2 Activity**  
-  Beacon detection in VPN segment, tied to MITRE T1071.001  
-- **Kerberoasting + Golden Ticket**  
-  AD abuse simulation in internal LAN  
-- **DNS Tunneling (Exfiltration)**  
-  Lateral movement and stealthy exfiltration path detection  
-- **IoT Segment Vulnerability**  
-  Air-gapped OT network with default credentials issue  
-- **CVE Exploits**  
-  CVE-2024-3094 (XZ backdoor), CVE-2024-0012 (PAN-OS bypass), and more
+- Static frontend built with HTML5, CSS3, JavaScript (ES6+), and Chart.js
+- Runs entirely in the browser, no backend or installation required
+- Responsive layout for 1920x1080 and tablets
+- Secure by design: no telemetry, no external calls, no persistent storage
 
 ---
 
-## Getting Started
+## Network Scope Simulated
 
-No backend or install required.
+| Segment           | Purpose                             | CIDR               |
+|-------------------|-------------------------------------|--------------------|
+| Internal LAN      | Finance and executive workstations  | 192.168.1.0/24     |
+| DMZ               | Web, mail, and public servers       | 10.0.1.0/24        |
+| Server Farm       | Application and database servers    | 172.16.0.0/16      |
+| VPN Pool          | Remote access endpoint range        | 10.8.0.0/24        |
+| IoT/OT            | Smart building and ICS              | 192.168.100.0/24   |
+| Guest WiFi        | Visitor and unmanaged devices       | 192.168.200.0/24   |
+
+Each segment is associated with simulated data to represent different risk levels and exposure points.
+
+---
+
+## Running the Dashboard
+
+No installation required. Just clone and open the HTML file:
 
 ```bash
-git clone https://github.com/Secu7/soc-threat-dashboard.git
-cd soc-threat-dashboard
+git clone https://github.com/Secu7/IT-Security-Management-System-Dashboard.git
+cd IT-Security-Management-System-Dashboard
+open index.html  
 
-Then open index.html in your browser.
+Click "Execute Full-Spectrum Security Scan" to start the interactive simulation.
 
-You can click the red "Execute Full-Spectrum Security Scan" button to start the interactive scan simulation and watch metrics update in real time.
+Technical Details
+Built with Chart.js for dynamic visualization
 
-Target Audience
-SOC Analysts (Tier 1–3)
+Custom scan logic simulates Nmap, Nessus, ZAP, SQLMap, AD tools, and threat correlation rules
 
-Incident Response and Threat Hunting Teams
+Each security card and chart is tied to a use case based on real threat types
 
-Security Architects and Governance Leads
-
-Candidates preparing for SC-200, AZ-500, or CISSP
-
-Notes
-Data is fully simulated for demonstration purposes.
-
-Designed for desktop resolutions (optimal at 1920x1080).
-
-All security scenarios, metrics, and mappings are modeled from actual operational practices.
-
+Clean modular structure for easy extension and theming

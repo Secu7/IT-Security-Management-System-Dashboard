@@ -10,6 +10,7 @@ The dashboard provides a unified view of simulated threat intelligence, incident
 
 Rather than focusing on visuals, this system models how analysts make decisions. It combines real-world frameworks like MITRE ATT&CK, NIST CSF, Zero Trust, and SOC 2 into an interface built to support simulated security operations.
 
+Live Demo : https://secu7.github.io/IT-Security-Management-System-Dashboard/
 ---
 
 ## Key Features
